@@ -1,0 +1,35 @@
+## Backend (.NET)
+bin/
+obj/
+*.db
+*.db-shm
+*.db-wal
+.vs/
+.vscode/
+*.user
+*.suo
+appsettings.*.json
+
+## Frontend (Node)
+node_modules/
+dist/
+.env.local
+.env.*.local
+.cache/
+
+## System
+.DS_Store
+Thumbs.db
+*.log
+
+## IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+## OS
+.env
+gym_booking.db
+gym_booking_dev.db

@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "description": "Gym Booking System - Full Stack Web Application",
+  "structure": {
+    "Backend": "ASP.NET Core 8 REST API",
+    "Frontend": "React 18 with TypeScript",
+    "Database": "SQLite with EF Core",
+    "Auth": "JWT Bearer Tokens"
+  }
+}
