@@ -8,28 +8,52 @@ obj/
 .vscode/
 *.user
 *.suo
-appsettings.*.json
 
 ## Frontend (Node)
 node_modules/
 dist/
+build/
+.cache/
+coverage/
+
+## Environment Files
+.env
 .env.local
 .env.*.local
-.cache/
-
-## System
-.DS_Store
-Thumbs.db
-*.log
+appsettings.*.json
+!appsettings.Production.json.example
+!appsettings.Development.json.example
 
 ## IDE
 .idea/
+.DS_Store
+Thumbs.db
 *.swp
 *.swo
 *~
-.vscode/
+
+## Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
 
 ## OS
-.env
-gym_booking.db
-gym_booking_dev.db
+.DS_Store
+Thumbs.db
+
+## Build artifacts
+*.nupkg
+publish/
+
+## Vercel
+.vercel/
+.output
+
+## Testing
+coverage/
+.nyc_output/
+
+## Keep example files
+!.env.example
+!appsettings.example.json
