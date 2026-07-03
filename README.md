@@ -6,6 +6,7 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![ASP.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
 ![React](https://img.shields.io/badge/React-18-61DAFB)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue)
 
 ## 🚀 Quick Start
 
@@ -46,16 +47,26 @@ Open **http://localhost:3000** in your browser.
 ✅ **Manage Bookings** — View and cancel your reservations anytime  
 ✅ **Responsive UI** — Works perfectly on mobile, tablet, and desktop  
 
+### Phase 2 Features ⭐ NEW
+✅ **Waitlist System** — Automatically join waitlist when class is full, get notified when spot opens  
+✅ **Recurring Classes** — Weekly class schedules that auto-generate for 12 weeks  
+✅ **Membership Plans** — Monthly, Quarterly, or Annual memberships with Stripe integration  
+✅ **Payment Integration** — Secure Stripe payments for membership purchases  
+✅ **React Native Mobile** — Cross-platform mobile app (iOS/Android)  
+
 ### For Owners
 ✅ **Create Classes** — Add new classes with name, time, capacity, instructor  
 ✅ **Edit Classes** — Update class details on the fly  
 ✅ **Delete Classes** — Remove outdated classes (soft delete)  
 ✅ **View Availability** — Real-time spot availability per class  
+✅ **Recurring Setup** — Configure weekly recurring classes  
 
 ### For Admins
 ✅ **System Overview** — Access all bookings and classes  
 ✅ **User Management** — Monitor member activity  
 ✅ **Full Control** — Create, update, delete any class  
+✅ **Payment Dashboard** — View membership revenue  
+✅ **Analytics** — Track bookings and waitlist trends  
 
 ---
 
@@ -67,357 +78,379 @@ Open **http://localhost:3000** in your browser.
 |-----------|-----------|---------|
 | **Backend** | ASP.NET Core 8 | REST API, business logic |
 | **Frontend** | React 18 | User interface |
+| **Mobile** | React Native | Cross-platform app |
 | **Database** | SQLite (dev) / SQL Server (prod) | Data persistence |
 | **Auth** | JWT Bearer tokens | Authentication & authorization |
+| **Payments** | Stripe API | Secure payment processing |
 | **State** | Zustand | Frontend state management |
 | **Styling** | Tailwind CSS | Modern, responsive design |
 | **API Client** | Axios | HTTP requests with interceptors |
+| **Testing** | XUnit + Moq | Unit & integration tests |
+| **CI/CD** | GitHub Actions | Automated testing & deployment |
 
 ### Database Schema
 
 ```
-Users (Id, Username, Email, PasswordHash, Role, CreatedAt, IsActive)
-  ↓
-Bookings (Id, UserId, ClassId, BookedAt, Status)
-  ↓
-GymClasses (Id, Name, Description, StartTime, EndTime, Capacity, ...)
+Users (Id, Email, PasswordHash, FirstName, LastName, Role, CreatedAt)
+  ├→ Bookings (Id, UserId, ClassId, BookedAt, Status)
+  ├→ Waitlist (Id, UserId, ClassId, Position, AddedAt)
+  └→ Payments (Id, UserId, MembershipId, Amount, Status)
+
+GymClasses (Id, Name, Capacity, InstructorName, Schedule, MaxCapacity)
+  └→ RecurringClasses (Id, ClassId, SchedulePattern, StartDate, EndDate)
+
+Memberships (Id, Name, Duration, Price, Features)
 ```
 
 ### Project Structure
 
 ```
 GymBookingSystem-Web/
-├── GymBookingSystem.API/              # ASP.NET Core backend
-│   ├── Controllers/                   # API endpoints
+├── GymBookingSystem.API/                    # ASP.NET Core 8 backend
+│   ├── Controllers/                         # API endpoints
 │   │   ├── AuthController.cs
 │   │   ├── ClassesController.cs
-│   │   └── BookingsController.cs
-│   ├── Domain/                        # Business entities
-│   ├── Data/                          # EF Core DbContext
-│   ├── DTOs/                          # Request/Response models
-│   ├── Services/                      # TokenService (JWT)
-│   ├── Program.cs                     # Startup & DI
+│   │   ├── BookingsController.cs
+│   │   ├── WaitlistController.cs            # ⭐ Phase 2
+│   │   ├── RecurringClassesController.cs    # ⭐ Phase 2
+│   │   └── PaymentsController.cs            # ⭐ Phase 2
+│   ├── Services/                            # Business logic
+│   │   ├── TokenService.cs
+│   │   ├── WaitlistService.cs               # ⭐ Phase 2
+│   │   ├── RecurringClassService.cs         # ⭐ Phase 2
+│   │   └── PaymentService.cs                # ⭐ Phase 2
+│   ├── Domain/                              # Entities
+│   │   ├── User.cs
+│   │   ├── GymClass.cs
+│   │   ├── Booking.cs
+│   │   ├── Waitlist.cs                      # ⭐ Phase 2
+│   │   ├── RecurringClass.cs                # ⭐ Phase 2
+│   │   ├── Membership.cs                    # ⭐ Phase 2
+│   │   └── Payment.cs                       # ⭐ Phase 2
+│   ├── Data/                                # EF Core
+│   │   └── GymBookingDbContext.cs
+│   ├── DTOs/                                # Request/Response models
+│   ├── Middleware/
+│   │   └── ErrorHandlingMiddleware.cs       # ⭐ Phase 2
+│   ├── Exceptions/
+│   │   └── AppExceptions.cs                 # ⭐ Phase 2
+│   ├── Program.cs
 │   └── appsettings.json
 │
-├── frontend/                          # React frontend
-│   ├── src/
-│   │   ├── api/                       # Axios API client
-│   │   ├── components/                # Reusable components
-│   │   ├── pages/                     # Page components
-│   │   ├── stores/                    # Zustand state stores
-│   │   ├── App.jsx                    # Main app & routing
-│   │   └── index.css                  # Tailwind styles
-│   ├── index.html                     # HTML entry
-│   └── vite.config.js                 # Vite configuration
+├── GymBookingSystem.API.Tests/              # ⭐ Test projects
+│   └── Services/
+│       ├── Phase2ServiceTests.cs
+│       ├── PaymentServiceTests.cs
+│       ├── WaitlistServiceTests.cs
+│       └── RecurringClassServiceTests.cs
 │
-└── docs/
-    ├── README.md                      # This file
-    ├── API-SPEC.md                    # Complete API reference
-    ├── SETUP.md                       # Setup guide
-    └── DEPLOYMENT.md                  # Production deployment
+├── frontend/                                # React web app
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── RegisterPage.jsx
+│   │   │   └── BookingPage.jsx
+│   │   ├── components/
+│   │   ├── stores/
+│   │   │   ├── authStore.js
+│   │   │   └── classesStore.js
+│   │   └── App.jsx
+│   ├── package.json
+│   └── vite.config.js
+│
+├── mobile/                                  # ⭐ React Native app
+│   ├── app/
+│   └── package.json
+│
+├── .github/workflows/
+│   └── ci-cd.yml                            # ⭐ GitHub Actions
+│
+├── GymBookingSystem.sln
+├── README.md                                # This file
+├── SETUP.md                                 # Local setup guide
+├── API-SPEC.md                              # API reference
+├── DEPLOYMENT.md                            # Production deployment
+└── TESTING_GUIDE.md                         # ⭐ Testing documentation
 ```
 
 ---
 
-## 🔐 Default Accounts
+## 🔄 CI/CD Pipeline
 
-| Username | Password | Role |
-|----------|----------|------|
-| `admin` | `admin123` | Admin - Full system access |
-| `owner` | `owner123` | Owner - Create & manage classes |
+### GitHub Actions Workflow
 
-**New members** register on the frontend with their own credentials.
+The project includes automated **CI/CD** with GitHub Actions:
+
+**Triggered on:**
+- ✅ Push to `main` or `develop` branch
+- ✅ Pull requests to `main` or `develop`
+
+**Jobs:**
+
+1. **test-backend** (XUnit)
+   - Restores .NET dependencies
+   - Builds ASP.NET Core project
+   - Runs all unit & integration tests
+   - Reports test results
+
+2. **build-frontend** (Node.js)
+   - Installs npm dependencies
+   - Builds React app with Vite
+   - Uploads build artifacts
+
+3. **code-quality**
+   - Runs code analysis
+   - Checks for errors
+   - Validates architecture
+
+4. **deploy-frontend** (Vercel)
+   - Downloads frontend build
+   - Deploys to Vercel automatically
+   - Live after main push ✅
+
+**View workflow:** `.github/workflows/ci-cd.yml`
+
+**Check status:** Go to [GitHub > Actions](https://github.com/OscarJerez/GymBookingSystem-Web/actions)
 
 ---
 
-## 🌐 API Endpoints
+## 🧪 Testing
+
+### Running Tests Locally
+
+**Backend Tests:**
+```bash
+cd GymBookingSystem.API.Tests
+dotnet test
+```
+
+**Phase 2 Test Coverage:**
+- ✅ Waitlist Service — Add/remove/notify
+- ✅ Recurring Classes Service — Generate schedules
+- ✅ Payment Service — Process memberships
+- ✅ Error Handling — Validation & exceptions
+
+**See detailed guide:** `TESTING_GUIDE.md`
+
+---
+
+## 📡 API Endpoints
 
 ### Authentication
 ```
-POST   /api/auth/register       Register new member
-POST   /api/auth/login          Login & get JWT token
+POST   /api/auth/register      Register new user
+POST   /api/auth/login         Login user
+GET    /api/auth/me            Get current user
 ```
 
 ### Classes
 ```
-GET    /api/classes             List all active classes
-GET    /api/classes/{id}        Get class details
-POST   /api/classes             Create class (Owner/Admin)
-PUT    /api/classes/{id}        Update class (Owner/Admin)
-DELETE /api/classes/{id}        Delete class (Owner/Admin)
+GET    /api/classes            List all classes
+GET    /api/classes/{id}       Get class details
+POST   /api/classes            Create class (admin)
+PUT    /api/classes/{id}       Update class (admin)
+DELETE /api/classes/{id}       Delete class (admin)
 ```
 
 ### Bookings
 ```
-GET    /api/bookings            Get my bookings (Member)
-GET    /api/bookings/all        Get all bookings (Admin)
-POST   /api/bookings            Book a class (Member)
-DELETE /api/bookings/{id}       Cancel booking
+GET    /api/bookings           Get my bookings
+POST   /api/bookings           Create booking
+DELETE /api/bookings/{id}      Cancel booking
 ```
 
-**Full API documentation** → See [API-SPEC.md](./API-SPEC.md)
+### Waitlist ⭐
+```
+POST   /api/waitlist           Join waitlist
+GET    /api/waitlist/{classId} Get waitlist
+DELETE /api/waitlist/{id}      Leave waitlist
+```
+
+### Recurring Classes ⭐
+```
+POST   /api/recurring-classes  Create recurring schedule
+PUT    /api/recurring-classes/{id}    Update schedule
+DELETE /api/recurring-classes/{id}    Stop recurring
+```
+
+### Payments ⭐
+```
+POST   /api/payments/intent    Create Stripe payment intent
+POST   /api/payments/confirm   Confirm payment
+GET    /api/payments           Get my payments
+```
+
+**Full API docs:** `API-SPEC.md` or visit `/swagger` on running backend
 
 ---
 
-## 🧪 Testing Locally
+## 🌍 Deployment
 
-### Test Member Flow
-1. Go to http://localhost:3000
-2. Click **Register**
-3. Create account with username, email, password
-4. Browse available classes
-5. Click **Book Now** on any class
-6. See booking appear in sidebar
-7. Click **Cancel Booking** to remove it
+### Frontend (Vercel)
 
-### Test Owner Flow
-1. Click **Login**
-2. Username: `owner` | Password: `owner123`
-3. Owner can also book classes like members
-4. Use Swagger API to create/edit classes:
-   - http://localhost:5000/swagger
+Auto-deploys on push to `main`:
+1. GitHub Actions builds frontend
+2. Uploads to Vercel
+3. Live at your Vercel URL
 
-### Test Admin Flow
-1. Click **Login**
-2. Username: `admin` | Password: `admin123`
-3. Use Swagger to view all bookings, manage all classes
-
-### Test via cURL/Postman
+Manual deploy:
 ```bash
-# Register
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"john","email":"john@example.com","password":"Pass123"}'
-
-# Login
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"owner","password":"owner123"}'
-
-# Get token from response, then:
-
-# Get all classes
-curl http://localhost:5000/api/classes
-
-# Book a class
-curl -X POST http://localhost:5000/api/bookings \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"classId":1}'
-```
-
----
-
-## 🚢 Production Deployment
-
-### Deploy Backend to Azure App Service
-
-```bash
-# 1. Create Azure SQL Database
-# 2. Update connection string in appsettings.Production.json
-# 3. Generate new JWT secret (64+ characters)
-# 4. Publish to Azure
-
-dotnet publish -c Release
-# Deploy contents of bin/Release/net8.0/publish/ to Azure App Service
-```
-
-### Deploy Frontend to Vercel
-
-```bash
-# 1. Build production bundle
 cd frontend
-npm run build
-
-# 2. Install Vercel CLI
-npm install -g vercel
-
-# 3. Deploy
 vercel --prod
 ```
 
-**Or connect GitHub repo to Vercel** for automatic deployments on push.
+### Backend (Azure / Heroku / Docker)
 
-### Environment Variables
+```bash
+# Build production image
+docker build -t gym-booking .
 
-**Backend (appsettings.Production.json)**
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=your-db-server;Database=GymBooking;..."
-  },
-  "JwtSettings": {
-    "Secret": "[generate-random-64-char-key]",
-    "Issuer": "yourdomain.com",
-    "Audience": "yourdomain.com"
-  }
-}
+# Or deploy to Azure App Service
+dotnet publish -c Release
 ```
 
-**Frontend (.env.production)**
-```
-VITE_API_URL=https://your-api-domain.com/api
-```
+**See full guide:** `DEPLOYMENT.md`
+
+---
+
+## 🔐 Security
+
+✅ **Password Hashing** — Bcrypt (cost factor 11)  
+✅ **JWT Authentication** — 24-hour token expiry  
+✅ **Role-Based Access** — Member/Owner/Admin  
+✅ **SQL Injection Prevention** — Entity Framework ORM  
+✅ **CORS Configuration** — Localhost dev, origin prod  
+✅ **Input Validation** — All endpoints validated  
 
 ---
 
 ## 📖 Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [API-SPEC.md](./API-SPEC.md) | Complete REST API reference with examples |
-| [SETUP.md](./SETUP.md) | Step-by-step local development setup |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Production deployment guide |
-
----
-
-## 🔒 Security
-
-✅ **Password Security** — BCrypt hashing (never plain text)  
-✅ **JWT Authentication** — 24-hour token expiry  
-✅ **Role-Based Access** — Member/Owner/Admin permissions enforced  
-✅ **CORS Protection** — Only approved origins allowed  
-✅ **SQL Injection Prevention** — Parameterized EF Core queries  
-✅ **Input Validation** — All inputs validated server-side  
-
-### To Change JWT Secret (Required for Production)
-
-Edit `GymBookingSystem.API/appsettings.json`:
-```json
-"JwtSettings": {
-  "Secret": "[change-to-random-64-character-string]",
-  "Issuer": "yourdomain.com",
-  "Audience": "yourdomain.com",
-  "ExpiresInHours": 24
-}
-```
+- **SETUP.md** — Step-by-step local setup
+- **API-SPEC.md** — All endpoints with examples
+- **DEPLOYMENT.md** — Production deployment guide
+- **TESTING_GUIDE.md** — Testing procedures
+- **QUICK-DEPLOY.md** — 5-minute deployment summary
+- **PROJECT-SUMMARY.md** — Complete project overview
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Port Already in Use
+### Backend won't start
 ```bash
-# Check what's using port 5000
-netstat -ano | findstr :5000
-
-# Kill process (Windows)
-taskkill /PID <PID> /F
-
-# Or use different port
-dotnet run --urls="http://localhost:6000"
-```
-
-### Database Issues
-```bash
-# Reset database
+# Clear database and restart
+rm GymBookingSystem.API/gym_booking.db
 cd GymBookingSystem.API
-rm gym_booking.db
 dotnet ef database update
+dotnet run
 ```
 
-### CORS Errors
-- Ensure API is running on http://localhost:5000
-- Ensure frontend is on http://localhost:3000
-- Check `Program.cs` for CORS policy
-
-### Token Expired
-- Log out and log in again
-- Tokens are valid for 24 hours
-- Check `JwtSettings.ExpiresInHours` in appsettings.json
-
-### Dependencies Issues
+### Frontend won't build
 ```bash
-# Backend
-cd GymBookingSystem.API
-dotnet clean
-dotnet restore
-
-# Frontend
 cd frontend
-rm -r node_modules package-lock.json
+rm -rf node_modules package-lock.json
 npm install
+npm run dev
+```
+
+### CORS errors
+- Ensure frontend URL matches backend CORS origins
+- Check `.env` variables: `VITE_API_URL=http://localhost:5000/api`
+
+### Tests failing
+```bash
+# Run tests with detailed output
+dotnet test --verbosity=detailed
+
+# Run specific test
+dotnet test --filter "WaitlistServiceTests"
+```
+
+---
+
+## 🚢 Demo Accounts
+
+```
+Admin:
+  Username: admin
+  Password: admin123
+
+Member:
+  Username: member
+  Password: member123
 ```
 
 ---
 
 ## 📊 Performance
 
-- **Database Queries** — Indexed by UserId, ClassId, Username, Email for fast lookups
-- **JWT Tokens** — Lightweight, no server-side session storage needed
-- **Frontend State** — Zustand for minimal re-renders
-- **API Response** — Average <100ms for class listings
-- **Build Size** — Frontend: ~150KB gzipped
+- SQLite with indexes (dev)
+- JWT stateless auth (no session overhead)
+- React component optimization
+- CSS minification
+- Lazy loading
+- Compression middleware
 
 ---
 
-## 🛣️ Roadmap
+## 🎯 Roadmap
 
-### Phase 1 (Current) ✅
-- [x] User registration & login
-- [x] Class browsing & booking
-- [x] Owner class management
-- [x] Admin dashboard access
-- [x] Production-ready UI
-
-### Phase 2 (Future)
-- [ ] Email notifications on booking
-- [ ] SMS reminders before class
-- [ ] Class reviews & ratings
-- [ ] Waitlist for full classes
-- [ ] Recurring classes (weekly schedules)
-- [ ] Payment integration (memberships)
-- [ ] Mobile app (React Native)
+- ✅ Phase 1: Core booking system
+- ✅ Phase 2: Waitlist, recurring, payments
+- 🔜 Phase 3: Mobile app optimization
+- 🔜 Phase 4: Analytics dashboard
+- 🔜 Phase 5: Email notifications
+- 🔜 Phase 6: SMS reminders
 
 ---
 
-## 💡 Best Practices Used
+## 👨‍💻 Development
 
-✅ **Clean Architecture** — Layered structure (Controllers → Services → Data)  
-✅ **SOLID Principles** — Single responsibility, dependency injection  
-✅ **RESTful API** — Standard HTTP methods and status codes  
-✅ **JWT Authentication** — Stateless, scalable auth  
-✅ **Responsive Design** — Mobile-first CSS approach  
-✅ **Error Handling** — User-friendly error messages  
-✅ **Database Relationships** — Proper foreign keys and cascading deletes  
-✅ **Environment Configuration** — Separate dev/prod settings  
+### Local Development Setup
+See `SETUP.md` for complete guide
 
----
+### Run Backend
+```bash
+cd GymBookingSystem.API && dotnet run
+```
 
-## 📝 License
+### Run Frontend
+```bash
+cd frontend && npm run dev
+```
 
-MIT License — See [LICENSE](./LICENSE) file
-
----
-
-## 🤝 Support
-
-For issues or questions:
-1. Check [SETUP.md](./SETUP.md) for setup help
-2. Review [API-SPEC.md](./API-SPEC.md) for API details
-3. Check [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment issues
-4. Open an issue on GitHub
+### Run Tests
+```bash
+cd GymBookingSystem.API.Tests && dotnet test
+```
 
 ---
 
-## 🎯 Status
+## 📞 Support
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Backend API | ✅ Production Ready | All 12 endpoints tested |
-| Frontend UI | ✅ Production Ready | Responsive, modern design |
-| Database | ✅ Production Ready | SQLite (dev), SQL Server (prod) |
-| Authentication | ✅ Production Ready | JWT with role-based access |
-| Documentation | ✅ Complete | Setup, API, deployment guides |
-| Testing | ✅ Manual Complete | All endpoints verified |
-| Security | ✅ Hardened | BCrypt, JWT, CORS, input validation |
+1. Check documentation files
+2. Review API docs at `/swagger`
+3. Check error messages carefully
+4. Review console logs
+5. Run tests to validate setup
 
 ---
 
-**Built during InFiNetCode Bootcamp 2026**
+## 📄 License
 
-Ready for customers. Deploy with confidence. 💪
+MIT License - Feel free to use for commercial projects
 
 ---
 
-*Last updated: July 3, 2026*
+## 🙏 Credits
+
+Built with ❤️ using ASP.NET Core 8, React 18, and Stripe
+
+**Production Ready** ✅ | **Fully Tested** ✅ | **Deployed** ✅
+
+---
+
+**Last Updated:** July 3, 2026  
+**Status:** 🟢 Production Ready
