@@ -10,6 +10,10 @@ public class GymBookingDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<GymClass> GymClasses => Set<GymClass>();
     public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<MembershipPlan> MembershipPlans => Set<MembershipPlan>();
+    public DbSet<MembershipSubscription> MembershipSubscriptions => Set<MembershipSubscription>();
+    public DbSet<RecurringClass> RecurringClasses => Set<RecurringClass>();
+    public DbSet<ClassWaitlist> ClassWaitlists => Set<ClassWaitlist>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,7 +37,54 @@ public class GymBookingDbContext : DbContext
             .HasForeignKey(b => b.ClassId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Seed data
+        // MembershipSubscription
+        modelBuilder.Entity<MembershipSubscription>()
+            .HasOne(ms => ms.User)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ClassWaitlist
+        modelBuilder.Entity<ClassWaitlist>()
+            .HasIndex(w => new { w.ClassId, w.Position });
+
+        // Seed membership plans
+        modelBuilder.Entity<MembershipPlan>().HasData(
+            new MembershipPlan
+            {
+                Id = 1,
+                Name = "Monthly Pass",
+                Description = "Unlimited classes for 30 days",
+                Price = 49.99m,
+                DurationDays = 30,
+                ClassesPerMonth = 0, // Unlimited
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new MembershipPlan
+            {
+                Id = 2,
+                Name = "Quarterly Pass",
+                Description = "Unlimited classes for 90 days",
+                Price = 129.99m,
+                DurationDays = 90,
+                ClassesPerMonth = 0,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new MembershipPlan
+            {
+                Id = 3,
+                Name = "Annual Pass",
+                Description = "Unlimited classes for 365 days",
+                Price = 399.99m,
+                DurationDays = 365,
+                ClassesPerMonth = 0,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        );
+
+        // Seed default users
         var adminHash = BCrypt.Net.BCrypt.HashPassword("admin123");
         var ownerHash = BCrypt.Net.BCrypt.HashPassword("owner123");
 

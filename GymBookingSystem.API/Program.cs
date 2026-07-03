@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using GymBookingSystem.API.Data;
 using GymBookingSystem.API.Services;
+using GymBookingSystem.API.Middleware;
 
 var builder = WebApplicationBuilder.CreateBuilder(args);
 
@@ -11,7 +12,11 @@ var builder = WebApplicationBuilder.CreateBuilder(args);
 builder.Services.AddDbContext<GymBookingDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register services
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IWaitlistService, WaitlistService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IRecurringClassService, RecurringClassService>();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Secret"]!);
@@ -39,10 +44,17 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "https://*.vercel.app")
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
+});
+
+// Add logging
+builder.Services.AddLogging(config =>
+{
+    config.AddConsole();
+    config.AddDebug();
 });
 
 var app = builder.Build();
@@ -60,6 +72,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Error handling middleware
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReact");

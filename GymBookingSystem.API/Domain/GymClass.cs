@@ -11,13 +11,17 @@ public class GymClass
     public string InstructorName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
+    public int? RecurringClassId { get; set; }
 
     // Navigation
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public ICollection<Waitlist> Waitlists { get; set; } = new List<Waitlist>();
+    public RecurringClass? RecurringClass { get; set; }
 
     public int BookedCount => Bookings.Count(b => b.Status == BookingStatus.Active);
     public bool IsFull => BookedCount >= Capacity;
     public int AvailableSpots => Capacity - BookedCount;
+    public int WaitlistCount => Waitlists.Count(w => w.Status == WaitlistStatus.Waiting);
     
     public string GetStatus() => IsFull ? "FULL" : $"Spots left: {AvailableSpots}";
     public string GetTimeRange() => $"{StartTime:dddd HH:mm} - {EndTime:HH:mm}";
